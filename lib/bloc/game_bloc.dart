@@ -1,4 +1,3 @@
-// game_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'game_event.dart';
@@ -12,28 +11,30 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   void _onPlayerMove(PlayerMove event, Emitter<GameState> emit) {
     final currentState = state;
+
     if (currentState.winner != null ||
         currentState.board[event.index] != '' ||
         currentState.isDraw) {
       return;
     }
 
-    // Update the board
     final newBoard = List<String>.from(currentState.board);
     newBoard[event.index] = currentState.isXNext ? 'X' : 'O';
 
-    // Check for a winner
-    final winner = _checkWinner(newBoard);
-    final isDraw =
-        !newBoard.contains('') && winner == null; // Check if it's a draw
+    final winnerResult = _checkWinner(newBoard);
+    final String? winner = winnerResult['winner'] as String?;
+    final List<int>? winningIndices =
+        winnerResult['winningIndices'] as List<int>?;
+
+    final isDraw = !newBoard.contains('') && winner == null;
 
     emit(
       currentState.copyWith(
         board: newBoard,
         isXNext: !currentState.isXNext,
         winner: winner,
-        isDraw:
-            isDraw, // Set the draw state if there's no winner and the board is full
+        isDraw: isDraw,
+        winningIndices: winningIndices,
       ),
     );
   }
@@ -42,7 +43,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     emit(GameState.initial());
   }
 
-  String? _checkWinner(List<String> board) {
+  Map<String, dynamic> _checkWinner(List<String> board) {
     const List<List<int>> winningPositions = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
       [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
@@ -55,11 +56,17 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       final c = board[positions[2]];
 
       if (a == b && b == c && a.isNotEmpty) {
-        return a; // Return the winner ('X' or 'O')
+        return {
+          'winner': a,
+          'winningIndices': positions,
+        };
       }
     }
 
-    return null; // No winner yet
+    return {
+      'winner': null,
+      'winningIndices': null,
+    };
   }
 
   void playerMove(int index) {

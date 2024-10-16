@@ -1,4 +1,3 @@
-// game_state.dart
 part of 'game_bloc.dart';
 
 class GameState {
@@ -6,12 +5,14 @@ class GameState {
   final bool isXNext;
   final String? winner;
   final bool isDraw;
+  final List<int>? winningIndices;
 
   const GameState({
     required this.board,
     required this.isXNext,
     this.winner,
     this.isDraw = false,
+    this.winningIndices,
   });
 
   factory GameState.initial() {
@@ -26,12 +27,14 @@ class GameState {
     bool? isXNext,
     String? winner,
     bool? isDraw,
+    List<int>? winningIndices,
   }) {
     return GameState(
       board: board ?? this.board,
       isXNext: isXNext ?? this.isXNext,
       winner: winner,
       isDraw: isDraw ?? this.isDraw,
+      winningIndices: winningIndices ?? this.winningIndices,
     );
   }
 }
